@@ -92,12 +92,15 @@ const SettingsPage = () => {
   };
 
   const handleClearData = () => {
+    console.log('Clear data button clicked');
     clearDataMutation.mutate(undefined, {
       onSuccess: () => {
+        console.log('Clear data successful');
         setClearConfirmOpen(false);
         toast.success('All your data has been cleared.');
       },
       onError: (e) => {
+        console.error('Clear data error:', e);
         const errorMessage = e instanceof Error ? e.message : 'Failed to clear data.';
         toast.error(errorMessage);
       },
@@ -105,12 +108,15 @@ const SettingsPage = () => {
   };
 
   const handleLogout = async () => {
+    console.log('Logout button clicked');
     setIsLoggingOut(true);
     try {
       await logout();
+      console.log('Logout successful');
       toast.success('Logged out successfully.');
       navigate('/login');
     } catch (error) {
+      console.error('Logout error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to log out.';
       toast.error(errorMessage);
       setIsLoggingOut(false);
