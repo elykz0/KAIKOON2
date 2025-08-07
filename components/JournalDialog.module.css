@@ -1,0 +1,211 @@
+.dialogContent {
+  max-width: 600px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.journalSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.label {
+  font-weight: 500;
+  color: var(--foreground);
+  margin-bottom: var(--spacing-2);
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.analyzeButton {
+  align-self: flex-end;
+  margin-top: var(--spacing-2);
+}
+
+.analysisSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.analysisHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.analysisTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.taskItem:hover {
+  background: var(--accent);
+  border-color: var(--accent-foreground);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.taskText {
+  flex: 1;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.deadline {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  background: var(--muted);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+}
+
+.obstaclesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.obstacleItem {
+  padding: var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+.obstacleText {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.scheduleList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.scheduleItem {
+  padding: var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+.scheduleTime {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  margin-bottom: var(--spacing-1);
+}
+
+.scheduleTask {
+  font-weight: 500;
+  color: var(--foreground);
+  margin-bottom: var(--spacing-1);
+}
+
+.scheduleDeadline {
+  font-size: var(--font-size-sm);
+  color: var(--destructive);
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--border);
+}
+
+.createButton {
+  min-width: 120px;
+}
+
+@media (max-width: 640px) {
+  .dialogContent {
+    width: 95vw;
+    max-height: 90vh;
+  }
+  
+  .analysisHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+  
+  .taskItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+  
+  .deadline {
+    align-self: flex-start;
+  }
+}
