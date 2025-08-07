@@ -132,7 +132,7 @@ const TaskDetailPage = () => {
           }
           
           queryClient.invalidateQueries({ queryKey: ['tasks'] });
-          queryClient.invalidateQueries({ queryKey: ['user-progress'] }); // Refresh Kaiblooms
+          queryClient.invalidateQueries({ queryKey: ['userProgress'] }); // Refresh Kaiblooms
           console.log('Navigating to /dashboard');
           navigate('/dashboard');
         },

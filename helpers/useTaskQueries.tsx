@@ -18,6 +18,7 @@ export const useUserProgress = () => {
   return useQuery({
     queryKey: USER_PROGRESS_QUERY_KEY,
     queryFn: () => getUserProgress(),
+    staleTime: 0, // Always refetch when invalidated
   });
 };
 

@@ -58,6 +58,7 @@ export const getUserProgress = async (init?: RequestInit): Promise<OutputType> =
   } catch (error) {
     // Return mock data when API is not available
     console.warn('User progress API not available, using mock data:', error);
+    console.log('Returning mock user progress:', mockUserProgress);
     return mockUserProgress;
   }
 };

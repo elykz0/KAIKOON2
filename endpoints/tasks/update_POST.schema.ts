@@ -48,16 +48,16 @@ export const postTasksUpdate = async (body: InputType, init?: RequestInit): Prom
         // Update the task in mock storage
     let kaibloomsAwarded = 0;
     if (validatedInput.completed) {
-      // If task is being completed, remove it from the list
-      removeMockTask(validatedInput.taskId);
-      console.log('Task completed and removed from mock storage');
-      
-      // Award Kaiblooms for task completion
+      // Award Kaiblooms for task completion BEFORE removing the task
       const completedTask = getMockTasks().find(t => t.id === validatedInput.taskId);
       if (completedTask) {
         kaibloomsAwarded = awardKaibloomsForTask(completedTask.estimatedMinutes);
         console.log(`Awarded ${kaibloomsAwarded} Kaiblooms for completing task: ${completedTask.title}`);
       }
+      
+      // If task is being completed, remove it from the list
+      removeMockTask(validatedInput.taskId);
+      console.log('Task completed and removed from mock storage');
     } else {
       // Otherwise, update the task with new data
       updateMockTask(validatedInput.taskId, {
