@@ -10,7 +10,7 @@ import SettingsPage from '../pages/settings'
 import CollectiblesPage from '../pages/collectibles'
 import ReflectionLogsPage from '../pages/reflection-logs'
 import TaskDetailPage from '../pages/tasks.$taskId'
-import '../global.css'
+import '/global.css'
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {
