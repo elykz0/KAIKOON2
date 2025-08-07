@@ -18,6 +18,7 @@ import {
   postLogin,
 } from "../endpoints/auth/login_with_password_POST.schema";
 import { useAuth } from "../helpers/useAuth";
+import { useAuthRedirect } from "../helpers/useAuthRedirect";
 
 export type LoginFormData = z.infer<typeof schema>;
 
@@ -31,7 +32,7 @@ export const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { onLogin } = useAuth();
-  const navigate = useNavigate();
+  const { redirectAfterAuth } = useAuthRedirect();
 
   const form = useForm({
     defaultValues: {
@@ -51,8 +52,8 @@ export const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
       const result = await postLogin(data);
       console.log('Login successful:', result);
       onLogin(result.user);
-      console.log('Navigating to dashboard...');
-      setTimeout(() => navigate("/dashboard"), 200);
+      console.log('Redirecting after login...');
+      setTimeout(() => redirectAfterAuth(), 200);
     } catch (err) {
       console.error("Login error:", err);
       setError(

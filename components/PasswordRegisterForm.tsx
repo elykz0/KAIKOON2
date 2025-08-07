@@ -15,6 +15,7 @@ import { Button } from "./Button";
 import { Spinner } from "./Spinner";
 import styles from "./PasswordRegisterForm.module.css";
 import { useAuth } from "../helpers/useAuth";
+import { useAuthRedirect } from "../helpers/useAuthRedirect";
 import {
   schema,
   postRegister,
@@ -34,7 +35,7 @@ export const PasswordRegisterForm: React.FC<PasswordRegisterFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { onLogin } = useAuth();
-  const navigate = useNavigate();
+  const { redirectAfterAuth } = useAuthRedirect();
 
   const form = useForm({
     schema,
@@ -53,7 +54,7 @@ export const PasswordRegisterForm: React.FC<PasswordRegisterFormProps> = ({
       const result = await postRegister(data);
       console.log("Registration successful for:", data.email);
       onLogin(result.user);
-      navigate("/dashboard");
+      setTimeout(() => redirectAfterAuth(), 200);
     } catch (err) {
       console.error("Registration error:", err);
 

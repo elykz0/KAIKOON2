@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Info } from "lucide-react";
 import { useAuth } from "../helpers/useAuth";
+import { useAuthRedirect } from "../helpers/useAuthRedirect";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/Tabs";
 import { PasswordLoginForm } from "../components/PasswordLoginForm";
 import { PasswordRegisterForm } from "../components/PasswordRegisterForm";
@@ -10,17 +11,17 @@ import styles from "./login.module.css";
 
 const LoginPage: React.FC = () => {
   const { authState } = useAuth();
-  const navigate = useNavigate();
+  const { redirectAfterAuth } = useAuthRedirect();
 
   console.log('Login page - auth state:', authState);
 
   useEffect(() => {
     console.log('Login page - auth state changed:', authState);
     if (authState.type === "authenticated") {
-      console.log('User is authenticated, navigating to dashboard');
-      navigate("/dashboard");
+      console.log('User is authenticated, redirecting appropriately');
+      redirectAfterAuth();
     }
-  }, [authState, navigate]);
+  }, [authState, redirectAfterAuth]);
 
   if (authState.type === "loading") {
     // Render a minimal loading state or nothing to avoid flicker
