@@ -27,10 +27,8 @@ export const useCreateTaskFromJournal = () => {
       return createdTask;
     },
     onSuccess: (data) => {
-      console.log('Task creation successful, invalidating queries');
-      // Invalidate and refetch tasks
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      // Also manually update the cache to ensure immediate update
+      console.log('Task creation successful, updating cache');
+      // Only use setQueryData to avoid double updates
       queryClient.setQueryData(['tasks'], (oldData: any[] | undefined) => {
         console.log('Old tasks data:', oldData);
         const newData = oldData ? [data, ...oldData] : [data];
@@ -45,22 +43,57 @@ export const useCreateTaskFromJournal = () => {
     }
   });
 
-  const createMultipleTasks = async (tasks: Array<{ title: string; estimatedMinutes: number }>) => {
-    try {
+  const createMultipleTasksMutation = useMutation({
+    mutationFn: async (tasks: Array<{ title: string; estimatedMinutes: number }>) => {
+      console.log('Creating multiple tasks from journal:', tasks);
+      const createdTasks = [];
+      
       // Create tasks sequentially to avoid overwhelming the API
       for (const task of tasks) {
-        await createTaskMutation.mutateAsync(task);
+        // First, generate steps for the task
+        const steps = await postTasksGenerateSteps({ title: task.title });
+        console.log('Generated steps for task:', task.title, steps);
+        
+        // Then create the task with the generated steps
+        const createdTask = await postTasks({
+          title: task.title,
+          estimatedMinutes: task.estimatedMinutes,
+          steps: steps.map(step => ({
+            description: step.description,
+            materials: step.materials,
+            completed: false
+          }))
+        });
+        console.log('Created task:', createdTask);
+        createdTasks.push(createdTask);
       }
-      toast.success(`Created ${tasks.length} task${tasks.length !== 1 ? 's' : ''} from journal analysis!`);
-    } catch (error) {
+      
+      return createdTasks;
+    },
+    onSuccess: (createdTasks) => {
+      console.log('Multiple tasks created successfully, updating cache');
+      // Update cache with all created tasks at once
+      queryClient.setQueryData(['tasks'], (oldData: any[] | undefined) => {
+        console.log('Old tasks data:', oldData);
+        const newData = oldData ? [...createdTasks, ...oldData] : createdTasks;
+        console.log('New tasks data:', newData);
+        return newData;
+      });
+      toast.success(`Created ${createdTasks.length} task${createdTasks.length !== 1 ? 's' : ''} from journal analysis!`);
+    },
+    onError: (error) => {
       console.error('Failed to create multiple tasks:', error);
       toast.error('Some tasks failed to create. Please try again.');
     }
+  });
+
+  const createMultipleTasks = async (tasks: Array<{ title: string; estimatedMinutes: number }>) => {
+    await createMultipleTasksMutation.mutateAsync(tasks);
   };
 
   return {
     createTask: createTaskMutation.mutate,
     createMultipleTasks,
-    isCreating: createTaskMutation.isPending
+    isCreating: createTaskMutation.isPending || createMultipleTasksMutation.isPending
   };
 };
