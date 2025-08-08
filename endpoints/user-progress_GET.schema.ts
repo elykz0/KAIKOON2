@@ -11,9 +11,9 @@ export type InputType = z.infer<typeof schema>;
 export type OutputType = Selectable<UserProgress>;
 
 // Mock user progress storage
-let mockUserProgress: OutputType = {
+export let mockUserProgress: OutputType = {
   userId: 1,
-  kaibloomsPoints: 0,
+  kaibloomsPoints: 500, // Start with some Kaiblooms for testing
   updatedAt: new Date(),
 };
 

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import superjson from 'superjson';
+import { mockUserProgress } from '../user-progress_GET.schema';
 
 export const schema = z.object({
   collectibleTypeId: z.number().int().positive(),
@@ -45,13 +46,13 @@ export let mockUserCollectibles: Array<{
   }
 ];
 
-// Mock collectible types
+// Mock collectible types - must match the shop items exactly
 const mockCollectibleTypes = [
   { id: 1, name: "Golden Leaf", description: "A rare golden leaf that sparkles in the sunlight", emoji: "🍂", cost: 50 },
   { id: 2, name: "Crystal Flower", description: "A beautiful crystal flower that never wilts", emoji: "🌸", cost: 75 },
-  { id: 3, name: "Rainbow Gem", description: "A colorful gem that changes hues", emoji: "💎", cost: 100 },
-  { id: 4, name: "Starlight Orb", description: "A glowing orb that shines like the stars", emoji: "⭐", cost: 150 },
-  { id: 5, name: "Mystic Crystal", description: "A powerful crystal with ancient magic", emoji: "🔮", cost: 200 },
+  { id: 3, name: "Rainbow Butterfly", description: "A magical butterfly with rainbow wings", emoji: "🦋", cost: 100 },
+  { id: 4, name: "Starlight Tree", description: "A tree that glows with starlight at night", emoji: "🌳", cost: 150 },
+  { id: 5, name: "Moonstone", description: "A precious stone that glows with moonlight", emoji: "💎", cost: 200 },
 ];
 
 export const postCollectiblesPurchase = async (body: InputType, init?: RequestInit): Promise<OutputType> => {
@@ -108,9 +109,23 @@ export const postCollectiblesPurchase = async (body: InputType, init?: RequestIn
       console.log(`Added ${collectibleType.name} to inventory`);
     }
 
+    // Deduct the cost from user's Kaiblooms
+    const currentKaiblooms = mockUserProgress.kaibloomsPoints;
+    const newKaiblooms = currentKaiblooms - collectibleType.cost;
+    
+    if (newKaiblooms < 0) {
+      throw new Error('Not enough Kaiblooms to purchase this item');
+    }
+    
+    // Update the user's Kaiblooms
+    mockUserProgress.kaibloomsPoints = newKaiblooms;
+    mockUserProgress.updatedAt = new Date();
+    
+    console.log(`Deducted ${collectibleType.cost} Kaiblooms for ${collectibleType.name}. New balance: ${newKaiblooms}`);
+
     return {
       success: true,
-      newPoints: 100, // Mock new points value
+      newPoints: newKaiblooms,
     };
   }
 };
