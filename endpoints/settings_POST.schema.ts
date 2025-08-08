@@ -2,6 +2,7 @@ import { z } from "zod";
 import superjson from 'superjson';
 import { type Selectable } from "kysely";
 import { type UserSettings } from "../helpers/schema";
+import { persistence } from "../helpers/persistence";
 
 export const schema = z.object({
   grade: z.string().nullable().optional(),
