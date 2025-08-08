@@ -27,5 +27,6 @@ WHAT THE APP SAVES
 – The reflection emoji, your text, and its positive, neutral, or negative label.
 – Your total Kaibloom points.
 
-Built with Floot and Visual Code Studio
+
+Built with Visual Code Studio and Floot
 
