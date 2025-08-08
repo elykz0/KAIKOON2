@@ -16,9 +16,20 @@ export type TaskWithSteps = Selectable<Tasks> & {
 export type OutputType = TaskWithSteps[];
 
 // In-memory storage for mock tasks when API is not available
+// This will be replaced with user-specific storage
 let mockTasks: TaskWithSteps[] = persistence.loadTasks() || [];
 
-export const getTasks = async (init?: RequestInit): Promise<OutputType> => {
+// Function to get mock tasks for a specific user
+export const getMockTasksForUser = (userId?: number): TaskWithSteps[] => {
+  return persistence.loadTasks(userId) || [];
+};
+
+// Function to save mock tasks for a specific user
+export const saveMockTasksForUser = (tasks: TaskWithSteps[], userId?: number) => {
+  persistence.saveTasks(tasks, userId);
+};
+
+export const getTasks = async (init?: RequestInit, userId?: number): Promise<OutputType> => {
   try {
     const result = await fetch(`/_api/tasks`, {
       method: "GET",
@@ -39,39 +50,43 @@ export const getTasks = async (init?: RequestInit): Promise<OutputType> => {
   } catch (error) {
     // Return mock data when API is not available
     console.warn('Tasks API not available, using mock data:', error);
-    console.log('Current mock tasks:', mockTasks);
-    return mockTasks;
+    const userTasks = getMockTasksForUser(userId);
+    console.log('Current mock tasks for user:', userId, userTasks);
+    return userTasks;
   }
 };
 
 // Function to add mock tasks (used by postTasks)
-export const addMockTask = (task: TaskWithSteps) => {
-  console.log('Adding mock task:', task);
-  mockTasks.push(task);
-  persistence.saveTasks(mockTasks);
-  console.log('Updated mock tasks array:', mockTasks);
+export const addMockTask = (task: TaskWithSteps, userId?: number) => {
+  console.log('Adding mock task for user:', userId, task);
+  const userTasks = getMockTasksForUser(userId);
+  userTasks.push(task);
+  saveMockTasksForUser(userTasks, userId);
+  console.log('Updated mock tasks array for user:', userId, userTasks);
 };
 
 // Function to get mock tasks (for debugging)
-export const getMockTasks = () => mockTasks;
+export const getMockTasks = (userId?: number) => getMockTasksForUser(userId);
 
 // Function to update mock task (used by postTasksUpdate)
-export const updateMockTask = (taskId: number, updates: Partial<TaskWithSteps>) => {
-  console.log('Updating mock task:', taskId, updates);
-  const taskIndex = mockTasks.findIndex(task => task.id === taskId);
+export const updateMockTask = (taskId: number, updates: Partial<TaskWithSteps>, userId?: number) => {
+  console.log('Updating mock task for user:', userId, taskId, updates);
+  const userTasks = getMockTasksForUser(userId);
+  const taskIndex = userTasks.findIndex(task => task.id === taskId);
   if (taskIndex !== -1) {
-    mockTasks[taskIndex] = { ...mockTasks[taskIndex], ...updates };
-    persistence.saveTasks(mockTasks);
-    console.log('Updated mock tasks array:', mockTasks);
+    userTasks[taskIndex] = { ...userTasks[taskIndex], ...updates };
+    saveMockTasksForUser(userTasks, userId);
+    console.log('Updated mock tasks array for user:', userId, userTasks);
   } else {
-    console.warn('Task not found in mock storage:', taskId);
+    console.warn('Task not found in mock storage for user:', userId, taskId);
   }
 };
 
 // Function to remove mock task (used when task is completed)
-export const removeMockTask = (taskId: number) => {
-  console.log('Removing mock task:', taskId);
-  mockTasks = mockTasks.filter(task => task.id !== taskId);
-  persistence.saveTasks(mockTasks);
-  console.log('Updated mock tasks array:', mockTasks);
+export const removeMockTask = (taskId: number, userId?: number) => {
+  console.log('Removing mock task for user:', userId, taskId);
+  const userTasks = getMockTasksForUser(userId);
+  const updatedTasks = userTasks.filter(task => task.id !== taskId);
+  saveMockTasksForUser(updatedTasks, userId);
+  console.log('Updated mock tasks array for user:', userId, updatedTasks);
 };

@@ -17,7 +17,7 @@ export type InputType = z.infer<typeof schema>;
 
 export type OutputType = TaskWithSteps;
 
-export const postTasks = async (body: InputType, init?: RequestInit): Promise<OutputType> => {
+export const postTasks = async (body: InputType, init?: RequestInit, userId?: number): Promise<OutputType> => {
   const validatedInput = schema.parse(body);
   try {
     const result = await fetch(`/_api/tasks`, {
@@ -42,7 +42,7 @@ export const postTasks = async (body: InputType, init?: RequestInit): Promise<Ou
     console.warn('Tasks POST API not available, using mock data:', error);
     const mockTask: OutputType = {
       id: Date.now(), // Use timestamp as mock ID
-      userId: 1,
+      userId: userId || 1,
       title: validatedInput.title,
       estimatedMinutes: validatedInput.estimatedMinutes,
       completed: false,
@@ -58,7 +58,7 @@ export const postTasks = async (body: InputType, init?: RequestInit): Promise<Ou
       })) || [],
     };
     // Store the mock task so it appears in getTasks
-    addMockTask(mockTask);
+    addMockTask(mockTask, userId);
     return mockTask;
   }
 };

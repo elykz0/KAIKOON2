@@ -2,9 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { postTasks } from '../endpoints/tasks_POST.schema';
 import { postTasksGenerateSteps } from '../endpoints/tasks/generate-steps_POST.schema';
 import { toast } from 'sonner';
+import { useCurrentUserId } from './useAuth';
 
 export const useCreateTaskFromJournal = () => {
   const queryClient = useQueryClient();
+  const userId = useCurrentUserId();
 
   const createTaskMutation = useMutation({
     mutationFn: async (taskData: { title: string; estimatedMinutes: number }) => {
@@ -22,7 +24,7 @@ export const useCreateTaskFromJournal = () => {
           materials: step.materials,
           completed: false
         }))
-      });
+      }, undefined, userId);
       console.log('Created task:', createdTask);
       return createdTask;
     },
@@ -58,7 +60,7 @@ export const useCreateTaskFromJournal = () => {
             materials: step.materials,
             completed: false
           }))
-        });
+        }, undefined, userId);
         console.log('Created task:', createdTask);
         createdTasks.push(createdTask);
       }
