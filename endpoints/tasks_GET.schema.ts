@@ -15,10 +15,6 @@ export type TaskWithSteps = Selectable<Tasks> & {
 
 export type OutputType = TaskWithSteps[];
 
-// In-memory storage for mock tasks when API is not available
-// This will be replaced with user-specific storage
-let mockTasks: TaskWithSteps[] = persistence.loadTasks() || [];
-
 // Function to get mock tasks for a specific user
 export const getMockTasksForUser = (userId?: number): TaskWithSteps[] => {
   return persistence.loadTasks(userId) || [];

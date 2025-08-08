@@ -18,9 +18,11 @@ export const useTasks = () => {
 };
 
 export const useUserProgress = () => {
+  const userId = useCurrentUserId();
+  
   return useQuery({
     queryKey: USER_PROGRESS_QUERY_KEY,
-    queryFn: () => getUserProgress(),
+    queryFn: () => getUserProgress(undefined, userId),
     staleTime: 0, // Always refetch when invalidated
   });
 };
@@ -41,8 +43,10 @@ export const useCreateTask = () => {
 
 export const useUpdateTask = () => {
   const queryClient = useQueryClient();
+  const userId = useCurrentUserId();
+  
   return useMutation({
-    mutationFn: (updatedTask: UpdateTaskInput) => postTasksUpdate(updatedTask),
+    mutationFn: (updatedTask: UpdateTaskInput) => postTasksUpdate(updatedTask, undefined, userId),
     onSuccess: (data) => {
       // Invalidate both tasks and user progress as points might have changed
       queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });

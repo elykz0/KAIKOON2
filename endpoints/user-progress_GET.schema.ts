@@ -11,37 +11,48 @@ export type InputType = z.infer<typeof schema>;
 
 export type OutputType = Selectable<UserProgress>;
 
-// Mock user progress storage - load from localStorage on initialization
-export let mockUserProgress: OutputType = persistence.loadUserProgress() || {
-  userId: 1,
-  kaibloomsPoints: 500, // Start with some Kaiblooms for testing
-  updatedAt: new Date(),
+// Function to get mock user progress for a specific user
+export const getMockUserProgressForUser = (userId?: number): OutputType => {
+  return persistence.loadUserProgress(userId) || {
+    userId: userId || 1,
+    kaibloomsPoints: 500, // Start with some Kaiblooms for testing
+    updatedAt: new Date(),
+  };
+};
+
+// Function to save mock user progress for a specific user
+export const saveMockUserProgressForUser = (progress: OutputType, userId?: number) => {
+  persistence.saveUserProgress(progress, userId);
 };
 
 // Function to award Kaiblooms for task completion
-export const awardKaibloomsForTask = (taskEstimatedMinutes: number) => {
+export const awardKaibloomsForTask = (taskEstimatedMinutes: number, userId?: number) => {
   // Award 50 Kaiblooms per completed task
   const kaibloomsToAward = 50;
   
-  mockUserProgress = {
-    ...mockUserProgress,
-    kaibloomsPoints: mockUserProgress.kaibloomsPoints + kaibloomsToAward,
+  const currentProgress = getMockUserProgressForUser(userId);
+  const updatedProgress = {
+    ...currentProgress,
+    kaibloomsPoints: currentProgress.kaibloomsPoints + kaibloomsToAward,
     updatedAt: new Date(),
   };
   
-  // Save to localStorage
-  persistence.saveUserProgress(mockUserProgress);
+  // Save to localStorage with user-specific key
+  saveMockUserProgressForUser(updatedProgress, userId);
   
-  console.log(`Awarded ${kaibloomsToAward} Kaiblooms for task completion`);
-  console.log(`Total Kaiblooms: ${mockUserProgress.kaibloomsPoints}`);
+  console.log(`Awarded ${kaibloomsToAward} Kaiblooms for task completion for user:`, userId);
+  console.log(`Total Kaiblooms for user ${userId}: ${updatedProgress.kaibloomsPoints}`);
   
   return kaibloomsToAward;
 };
 
-// Function to get current Kaiblooms
-export const getCurrentKaiblooms = () => mockUserProgress.kaibloomsPoints;
+// Function to get current Kaiblooms for a specific user
+export const getCurrentKaiblooms = (userId?: number) => {
+  const progress = getMockUserProgressForUser(userId);
+  return progress.kaibloomsPoints;
+};
 
-export const getUserProgress = async (init?: RequestInit): Promise<OutputType> => {
+export const getUserProgress = async (init?: RequestInit, userId?: number): Promise<OutputType> => {
   try {
     const result = await fetch(`/_api/user-progress`, {
       method: "GET",
@@ -62,7 +73,8 @@ export const getUserProgress = async (init?: RequestInit): Promise<OutputType> =
   } catch (error) {
     // Return mock data when API is not available
     console.warn('User progress API not available, using mock data:', error);
-    console.log('Returning mock user progress:', mockUserProgress);
-    return mockUserProgress;
+    const userProgress = getMockUserProgressForUser(userId);
+    console.log('Returning mock user progress for user:', userId, userProgress);
+    return userProgress;
   }
 };
