@@ -1,6 +1,7 @@
 import { z } from "zod";
 import superjson from 'superjson';
 import { mockUserProgress } from '../user-progress_GET.schema';
+import { persistence } from '../../helpers/persistence';
 
 export const schema = z.object({
   collectibleTypeId: z.number().int().positive(),
@@ -13,7 +14,7 @@ export type OutputType = {
   newPoints: number;
 };
 
-// Mock storage for user collectibles
+// Mock storage for user collectibles - load from localStorage on initialization
 export let mockUserCollectibles: Array<{
   userCollectibleId: number;
   quantity: number;
@@ -23,7 +24,7 @@ export let mockUserCollectibles: Array<{
   description: string;
   emoji: string;
   cost: number;
-}> = [
+}> = persistence.loadCollectibles() || [
   {
     userCollectibleId: 1,
     quantity: 2,
@@ -108,6 +109,9 @@ export const postCollectiblesPurchase = async (body: InputType, init?: RequestIn
       mockUserCollectibles.push(newCollectible);
       console.log(`Added ${collectibleType.name} to inventory`);
     }
+    
+    // Save to localStorage
+    persistence.saveCollectibles(mockUserCollectibles);
 
     // Deduct the cost from user's Kaiblooms
     const currentKaiblooms = mockUserProgress.kaibloomsPoints;
@@ -120,6 +124,9 @@ export const postCollectiblesPurchase = async (body: InputType, init?: RequestIn
     // Update the user's Kaiblooms
     mockUserProgress.kaibloomsPoints = newKaiblooms;
     mockUserProgress.updatedAt = new Date();
+    
+    // Save to localStorage
+    persistence.saveUserProgress(mockUserProgress);
     
     console.log(`Deducted ${collectibleType.cost} Kaiblooms for ${collectibleType.name}. New balance: ${newKaiblooms}`);
 

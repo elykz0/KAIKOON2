@@ -2,6 +2,7 @@ import { z } from "zod";
 import superjson from 'superjson';
 import { type Selectable } from "kysely";
 import { type UserProgress } from "../helpers/schema";
+import { persistence } from "../helpers/persistence";
 
 // No input schema needed for a simple GET request
 export const schema = z.object({});
@@ -10,8 +11,8 @@ export type InputType = z.infer<typeof schema>;
 
 export type OutputType = Selectable<UserProgress>;
 
-// Mock user progress storage
-export let mockUserProgress: OutputType = {
+// Mock user progress storage - load from localStorage on initialization
+export let mockUserProgress: OutputType = persistence.loadUserProgress() || {
   userId: 1,
   kaibloomsPoints: 500, // Start with some Kaiblooms for testing
   updatedAt: new Date(),
@@ -27,6 +28,9 @@ export const awardKaibloomsForTask = (taskEstimatedMinutes: number) => {
     kaibloomsPoints: mockUserProgress.kaibloomsPoints + kaibloomsToAward,
     updatedAt: new Date(),
   };
+  
+  // Save to localStorage
+  persistence.saveUserProgress(mockUserProgress);
   
   console.log(`Awarded ${kaibloomsToAward} Kaiblooms for task completion`);
   console.log(`Total Kaiblooms: ${mockUserProgress.kaibloomsPoints}`);

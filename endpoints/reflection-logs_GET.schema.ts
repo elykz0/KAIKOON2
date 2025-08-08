@@ -2,6 +2,7 @@ import { z } from "zod";
 import superjson from 'superjson';
 import { type Selectable } from "kysely";
 import { type Reflections } from "../helpers/schema";
+import { persistence } from "../helpers/persistence";
 
 // No input schema needed for a simple GET request
 export const schema = z.object({});
@@ -14,12 +15,13 @@ export type ReflectionLog = Selectable<Reflections> & {
 
 export type OutputType = ReflectionLog[];
 
-// Mock reflection logs storage
-let mockReflectionLogs: OutputType = [];
+// Mock reflection logs storage - load from localStorage on initialization
+let mockReflectionLogs: OutputType = persistence.loadReflections() || [];
 
 // Function to add a reflection log
 export const addMockReflectionLog = (reflection: OutputType[0]) => {
   mockReflectionLogs.unshift(reflection); // Add to beginning
+  persistence.saveReflections(mockReflectionLogs);
   console.log('Added reflection log:', reflection);
   console.log('Current reflection logs:', mockReflectionLogs);
 };

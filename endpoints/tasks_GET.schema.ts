@@ -2,6 +2,7 @@ import { z } from "zod";
 import superjson from 'superjson';
 import { type Selectable } from "kysely";
 import { type Tasks, type TaskSteps } from "../helpers/schema";
+import { persistence } from "../helpers/persistence";
 
 // No input schema needed for a simple GET request
 export const schema = z.object({});
@@ -15,7 +16,7 @@ export type TaskWithSteps = Selectable<Tasks> & {
 export type OutputType = TaskWithSteps[];
 
 // In-memory storage for mock tasks when API is not available
-let mockTasks: TaskWithSteps[] = [];
+let mockTasks: TaskWithSteps[] = persistence.loadTasks() || [];
 
 export const getTasks = async (init?: RequestInit): Promise<OutputType> => {
   try {
@@ -47,6 +48,7 @@ export const getTasks = async (init?: RequestInit): Promise<OutputType> => {
 export const addMockTask = (task: TaskWithSteps) => {
   console.log('Adding mock task:', task);
   mockTasks.push(task);
+  persistence.saveTasks(mockTasks);
   console.log('Updated mock tasks array:', mockTasks);
 };
 
@@ -59,6 +61,7 @@ export const updateMockTask = (taskId: number, updates: Partial<TaskWithSteps>) 
   const taskIndex = mockTasks.findIndex(task => task.id === taskId);
   if (taskIndex !== -1) {
     mockTasks[taskIndex] = { ...mockTasks[taskIndex], ...updates };
+    persistence.saveTasks(mockTasks);
     console.log('Updated mock tasks array:', mockTasks);
   } else {
     console.warn('Task not found in mock storage:', taskId);
@@ -69,5 +72,6 @@ export const updateMockTask = (taskId: number, updates: Partial<TaskWithSteps>) 
 export const removeMockTask = (taskId: number) => {
   console.log('Removing mock task:', taskId);
   mockTasks = mockTasks.filter(task => task.id !== taskId);
+  persistence.saveTasks(mockTasks);
   console.log('Updated mock tasks array:', mockTasks);
 };

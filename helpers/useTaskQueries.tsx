@@ -28,12 +28,8 @@ export const useCreateTask = () => {
     mutationFn: (newTask: CreateTaskInput) => postTasks(newTask),
     onSuccess: (data) => {
       console.log('Task created successfully:', data);
-      // Only use setQueryData to avoid double updates
-      queryClient.setQueryData(TASKS_QUERY_KEY, (oldData: TaskWithSteps[] | undefined) => {
-        const newData = oldData ? [data, ...oldData] : [data];
-        console.log('Updated tasks cache:', newData);
-        return newData;
-      });
+      // Invalidate the query to refetch from storage (which includes the new task)
+      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
     },
   });
 };

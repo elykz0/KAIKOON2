@@ -2,6 +2,7 @@ import { z } from "zod";
 import superjson from 'superjson';
 import { type Selectable } from "kysely";
 import { type UserSettings } from "../helpers/schema";
+import { persistence } from "../helpers/persistence";
 
 export const schema = z.object({});
 
@@ -9,8 +10,8 @@ export type InputType = z.infer<typeof schema>;
 
 export type OutputType = Selectable<UserSettings>;
 
-// Mock storage for settings
-export let mockSettings: OutputType = {
+// Mock storage for settings - load from localStorage on initialization
+export let mockSettings: OutputType = persistence.loadSettings() || {
   id: 1,
   userId: 1,
   hapticBuzz: true,

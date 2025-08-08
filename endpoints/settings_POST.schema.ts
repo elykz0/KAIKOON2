@@ -58,6 +58,9 @@ export const postSettings = async (body: InputType, init?: RequestInit): Promise
     mockSettings.notificationsEnabled = validatedInput.notificationsEnabled ?? true;
     mockSettings.updatedAt = new Date();
     
+    // Save to localStorage
+    persistence.saveSettings(mockSettings);
+    
     console.log('Updated mock settings:', mockSettings);
     
     return mockSettings;
