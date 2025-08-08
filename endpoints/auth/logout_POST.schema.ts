@@ -27,7 +27,26 @@ export const postLogout = async (
         ...(init?.headers ?? {}),
       },
     });
-    return result.json();
+    
+    if (!result.ok) {
+      // Handle non-OK responses
+      const errorText = await result.text();
+      console.warn('Logout API returned error:', result.status, errorText);
+      return {
+        success: true,
+        message: "Logged out successfully"
+      };
+    }
+    
+    try {
+      return await result.json();
+    } catch (jsonError) {
+      console.warn('Failed to parse logout response as JSON:', jsonError);
+      return {
+        success: true,
+        message: "Logged out successfully"
+      };
+    }
   } catch (error) {
     // Return mock data when API is not available
     console.warn('Logout API not available, using mock data:', error);

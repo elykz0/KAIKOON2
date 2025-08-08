@@ -135,6 +135,14 @@ export const AddTaskDialog = ({ open, onOpenChange, onSuccess }: AddTaskDialogPr
   };
 
   const onSubmit = async (values: AddTaskFormValues) => {
+    console.log('Form submitted with values:', values);
+    
+    // Prevent multiple submissions
+    if (createTaskMutation.isPending) {
+      console.log('Task creation already in progress, ignoring submission');
+      return;
+    }
+    
     try {
       const selectedSteps = generatedSteps
         .filter(step => step.selected)
@@ -148,6 +156,7 @@ export const AddTaskDialog = ({ open, onOpenChange, onSuccess }: AddTaskDialogPr
         ...(selectedSteps.length > 0 && { steps: selectedSteps }),
       };
 
+      console.log('Creating task with data:', taskData);
       await createTaskMutation.mutateAsync(taskData);
       
       // Haptic feedback for successful task creation
@@ -317,9 +326,15 @@ export const AddTaskDialog = ({ open, onOpenChange, onSuccess }: AddTaskDialogPr
             type="submit" 
             form="add-task-form" 
             disabled={createTaskMutation.isPending}
+            onClick={(e) => {
+              if (createTaskMutation.isPending) {
+                e.preventDefault();
+                console.log('Preventing duplicate submission');
+              }
+            }}
           >
             {createTaskMutation.isPending && <Spinner size="sm" />}
-            {hasSelectedSteps ? 'Create Task with Steps' : 'Create Task'}
+            {createTaskMutation.isPending ? 'Creating...' : (hasSelectedSteps ? 'Create Task with Steps' : 'Create Task')}
           </Button>
         </DialogFooter>
       </DialogContent>
