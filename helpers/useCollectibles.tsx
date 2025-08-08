@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCollectibles } from "../endpoints/collectibles_GET.schema";
 import { postCollectiblesPurchase, InputType as PurchaseInput } from "../endpoints/collectibles/purchase_POST.schema";
 import { getUserCollection } from "../endpoints/collectibles/user-collection_GET.schema";
+import { useCurrentUserId } from "./useAuth";
 import { toast } from "sonner";
 
 export const useCollectibles = () => {
@@ -12,17 +13,20 @@ export const useCollectibles = () => {
 };
 
 export const useUserCollection = () => {
+  const userId = useCurrentUserId();
+  
   return useQuery({
     queryKey: ["userCollection"],
-    queryFn: () => getUserCollection(),
+    queryFn: () => getUserCollection(undefined, userId),
   });
 };
 
 export const usePurchaseCollectible = () => {
   const queryClient = useQueryClient();
+  const userId = useCurrentUserId();
 
   return useMutation({
-    mutationFn: (purchaseData: PurchaseInput) => postCollectiblesPurchase(purchaseData),
+    mutationFn: (purchaseData: PurchaseInput) => postCollectiblesPurchase(purchaseData, undefined, userId),
     onSuccess: (data, variables) => {
       toast.success("Purchase successful! ✨");
       // Invalidate and refetch data that has changed

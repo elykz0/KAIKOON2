@@ -1,6 +1,6 @@
 import { z } from "zod";
 import superjson from 'superjson';
-import { mockUserProgress } from '../user-progress_GET.schema';
+import { getMockUserProgressForUser, saveMockUserProgressForUser } from '../user-progress_GET.schema';
 import { persistence } from '../../helpers/persistence';
 
 export const schema = z.object({
@@ -14,8 +14,8 @@ export type OutputType = {
   newPoints: number;
 };
 
-// Mock storage for user collectibles - load from localStorage on initialization
-export let mockUserCollectibles: Array<{
+// Function to get mock collectibles for a specific user
+export const getMockUserCollectiblesForUser = (userId?: number): Array<{
   userCollectibleId: number;
   quantity: number;
   purchasedAt: Date;
@@ -24,28 +24,44 @@ export let mockUserCollectibles: Array<{
   description: string;
   emoji: string;
   cost: number;
-}> = persistence.loadCollectibles() || [
-  {
-    userCollectibleId: 1,
-    quantity: 2,
-    purchasedAt: new Date(),
-    collectibleTypeId: 1,
-    name: "Golden Leaf",
-    description: "A rare golden leaf that sparkles in the sunlight",
-    emoji: "🍂",
-    cost: 50,
-  },
-  {
-    userCollectibleId: 2,
-    quantity: 1,
-    purchasedAt: new Date(),
-    collectibleTypeId: 2,
-    name: "Crystal Flower",
-    description: "A beautiful crystal flower that never wilts",
-    emoji: "🌸",
-    cost: 75,
-  }
-];
+}> => {
+  return persistence.loadCollectibles(userId) || [
+    {
+      userCollectibleId: 1,
+      quantity: 2,
+      purchasedAt: new Date(),
+      collectibleTypeId: 1,
+      name: "Golden Leaf",
+      description: "A rare golden leaf that sparkles in the sunlight",
+      emoji: "🍂",
+      cost: 50,
+    },
+    {
+      userCollectibleId: 2,
+      quantity: 1,
+      purchasedAt: new Date(),
+      collectibleTypeId: 2,
+      name: "Crystal Flower",
+      description: "A beautiful crystal flower that never wilts",
+      emoji: "🌸",
+      cost: 75,
+    }
+  ];
+};
+
+// Function to save mock collectibles for a specific user
+export const saveMockUserCollectiblesForUser = (collectibles: Array<{
+  userCollectibleId: number;
+  quantity: number;
+  purchasedAt: Date;
+  collectibleTypeId: number;
+  name: string;
+  description: string;
+  emoji: string;
+  cost: number;
+}>, userId?: number) => {
+  persistence.saveCollectibles(collectibles, userId);
+};
 
 // Mock collectible types - must match the shop items exactly
 const mockCollectibleTypes = [
@@ -56,7 +72,7 @@ const mockCollectibleTypes = [
   { id: 5, name: "Moonstone", description: "A precious stone that glows with moonlight", emoji: "💎", cost: 200 },
 ];
 
-export const postCollectiblesPurchase = async (body: InputType, init?: RequestInit): Promise<OutputType> => {
+export const postCollectiblesPurchase = async (body: InputType, init?: RequestInit, userId?: number): Promise<OutputType> => {
   const validatedInput = schema.parse(body);
   try {
     const result = await fetch(`/_api/collectibles/purchase`, {
@@ -85,19 +101,22 @@ export const postCollectiblesPurchase = async (body: InputType, init?: RequestIn
       throw new Error('Collectible type not found');
     }
 
+    // Get user-specific collectibles
+    const userCollectibles = getMockUserCollectiblesForUser(userId);
+    
     // Check if user already has this collectible
-    const existingCollectible = mockUserCollectibles.find(
+    const existingCollectible = userCollectibles.find(
       item => item.collectibleTypeId === validatedInput.collectibleTypeId
     );
 
     if (existingCollectible) {
       // Increase quantity
       existingCollectible.quantity += 1;
-      console.log(`Increased quantity of ${collectibleType.name} to ${existingCollectible.quantity}`);
+      console.log(`Increased quantity of ${collectibleType.name} to ${existingCollectible.quantity} for user:`, userId);
     } else {
       // Add new collectible to inventory
       const newCollectible = {
-        userCollectibleId: mockUserCollectibles.length + 1,
+        userCollectibleId: userCollectibles.length + 1,
         quantity: 1,
         purchasedAt: new Date(),
         collectibleTypeId: validatedInput.collectibleTypeId,
@@ -106,15 +125,16 @@ export const postCollectiblesPurchase = async (body: InputType, init?: RequestIn
         emoji: collectibleType.emoji,
         cost: collectibleType.cost,
       };
-      mockUserCollectibles.push(newCollectible);
-      console.log(`Added ${collectibleType.name} to inventory`);
+      userCollectibles.push(newCollectible);
+      console.log(`Added ${collectibleType.name} to inventory for user:`, userId);
     }
     
-    // Save to localStorage
-    persistence.saveCollectibles(mockUserCollectibles);
+    // Save to localStorage with user-specific key
+    saveMockUserCollectiblesForUser(userCollectibles, userId);
 
-    // Deduct the cost from user's Kaiblooms
-    const currentKaiblooms = mockUserProgress.kaibloomsPoints;
+    // Get current user progress and deduct the cost from user's Kaiblooms
+    const currentProgress = getMockUserProgressForUser(userId);
+    const currentKaiblooms = currentProgress.kaibloomsPoints;
     const newKaiblooms = currentKaiblooms - collectibleType.cost;
     
     if (newKaiblooms < 0) {
@@ -122,13 +142,16 @@ export const postCollectiblesPurchase = async (body: InputType, init?: RequestIn
     }
     
     // Update the user's Kaiblooms
-    mockUserProgress.kaibloomsPoints = newKaiblooms;
-    mockUserProgress.updatedAt = new Date();
+    const updatedProgress = {
+      ...currentProgress,
+      kaibloomsPoints: newKaiblooms,
+      updatedAt: new Date(),
+    };
     
-    // Save to localStorage
-    persistence.saveUserProgress(mockUserProgress);
+    // Save to localStorage with user-specific key
+    saveMockUserProgressForUser(updatedProgress, userId);
     
-    console.log(`Deducted ${collectibleType.cost} Kaiblooms for ${collectibleType.name}. New balance: ${newKaiblooms}`);
+    console.log(`Deducted ${collectibleType.cost} Kaiblooms for ${collectibleType.name} for user ${userId}. New balance: ${newKaiblooms}`);
 
     return {
       success: true,
