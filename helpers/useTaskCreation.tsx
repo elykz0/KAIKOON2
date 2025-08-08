@@ -27,14 +27,9 @@ export const useCreateTaskFromJournal = () => {
       return createdTask;
     },
     onSuccess: (data) => {
-      console.log('Task creation successful, updating cache');
-      // Only use setQueryData to avoid double updates
-      queryClient.setQueryData(['tasks'], (oldData: any[] | undefined) => {
-        console.log('Old tasks data:', oldData);
-        const newData = oldData ? [data, ...oldData] : [data];
-        console.log('New tasks data:', newData);
-        return newData;
-      });
+      console.log('Task creation successful, invalidating queries');
+      // Use invalidateQueries to ensure consistency and prevent duplicates
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       toast.success('Task created successfully!');
     },
     onError: (error) => {
@@ -71,14 +66,9 @@ export const useCreateTaskFromJournal = () => {
       return createdTasks;
     },
     onSuccess: (createdTasks) => {
-      console.log('Multiple tasks created successfully, updating cache');
-      // Update cache with all created tasks at once
-      queryClient.setQueryData(['tasks'], (oldData: any[] | undefined) => {
-        console.log('Old tasks data:', oldData);
-        const newData = oldData ? [...createdTasks, ...oldData] : createdTasks;
-        console.log('New tasks data:', newData);
-        return newData;
-      });
+      console.log('Multiple tasks created successfully, invalidating queries');
+      // Use invalidateQueries to ensure consistency and prevent duplicates
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       toast.success(`Created ${createdTasks.length} task${createdTasks.length !== 1 ? 's' : ''} from journal analysis!`);
     },
     onError: (error) => {
