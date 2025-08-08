@@ -22,6 +22,9 @@ export type UserCollectionItem = {
 
 export type OutputType = UserCollectionItem[];
 
+// Import the mock storage from purchase endpoint
+import { mockUserCollectibles } from './purchase_POST.schema';
+
 export const getUserCollection = async (init?: RequestInit): Promise<OutputType> => {
   try {
     const result = await fetch(`/_api/collectibles/user-collection`, {
@@ -43,27 +46,6 @@ export const getUserCollection = async (init?: RequestInit): Promise<OutputType>
   } catch (error) {
     // Return mock data when API is not available
     console.warn('User collection API not available, using mock data:', error);
-    return [
-      {
-        userCollectibleId: 1,
-        quantity: 2,
-        purchasedAt: new Date(),
-        collectibleTypeId: 1,
-        name: "Golden Leaf",
-        description: "A rare golden leaf that sparkles in the sunlight",
-        emoji: "🍂",
-        cost: 50,
-      },
-      {
-        userCollectibleId: 2,
-        quantity: 1,
-        purchasedAt: new Date(),
-        collectibleTypeId: 2,
-        name: "Crystal Flower",
-        description: "A beautiful crystal flower that never wilts",
-        emoji: "🌸",
-        cost: 75,
-      }
-    ];
+    return mockUserCollectibles;
   }
 };

@@ -20,6 +20,8 @@ export type InputType = z.infer<typeof schema>;
 
 export type OutputType = Selectable<UserSettings>;
 
+import { mockSettings } from './settings_GET.schema';
+
 export const postSettings = async (body: InputType, init?: RequestInit): Promise<OutputType> => {
   const validatedInput = schema.parse(body);
   try {
@@ -41,27 +43,23 @@ export const postSettings = async (body: InputType, init?: RequestInit): Promise
     }
     return superjson.parse<OutputType>(await result.text());
   } catch (error) {
-    // Return mock data when API is not available
+    // Update mock settings when API is not available
     console.warn('Settings API not available, using mock data:', error);
-    return {
-      id: 1,
-      userId: 1,
-      hapticBuzz: true,
-      soundEffects: true,
-      notifications: true,
-      theme: 'light',
-      fontSize: 'medium',
-      grade: validatedInput.grade || null,
-      classes: validatedInput.classes || null,
-      biggerText: validatedInput.biggerText || false,
-      breakRemindersEnabled: validatedInput.breakRemindersEnabled ?? true,
-      breakReminderInterval: validatedInput.breakReminderInterval || 30,
-      celebrationNotificationsEnabled: validatedInput.celebrationNotificationsEnabled ?? true,
-      dailyCheckinEnabled: validatedInput.dailyCheckinEnabled ?? true,
-      kaibeatPlaylistUrl: validatedInput.kaibeatPlaylistUrl || null,
-      notificationsEnabled: validatedInput.notificationsEnabled ?? true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    } as OutputType;
+    
+    // Update the mock settings with the new values
+    mockSettings.grade = validatedInput.grade || null;
+    mockSettings.classes = validatedInput.classes || null;
+    mockSettings.biggerText = validatedInput.biggerText || false;
+    mockSettings.breakRemindersEnabled = validatedInput.breakRemindersEnabled ?? true;
+    mockSettings.breakReminderInterval = validatedInput.breakReminderInterval || 30;
+    mockSettings.celebrationNotificationsEnabled = validatedInput.celebrationNotificationsEnabled ?? true;
+    mockSettings.dailyCheckinEnabled = validatedInput.dailyCheckinEnabled ?? true;
+    mockSettings.kaibeatPlaylistUrl = validatedInput.kaibeatPlaylistUrl || null;
+    mockSettings.notificationsEnabled = validatedInput.notificationsEnabled ?? true;
+    mockSettings.updatedAt = new Date();
+    
+    console.log('Updated mock settings:', mockSettings);
+    
+    return mockSettings;
   }
 };
