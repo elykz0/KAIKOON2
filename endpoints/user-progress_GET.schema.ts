@@ -19,8 +19,8 @@ let mockUserProgress: OutputType = {
 
 // Function to award Kaiblooms for task completion
 export const awardKaibloomsForTask = (taskEstimatedMinutes: number) => {
-  // Award 1 Kaibloom per 15 minutes of estimated time, minimum 1
-  const kaibloomsToAward = Math.max(1, Math.floor(taskEstimatedMinutes / 15));
+  // Award 50 Kaiblooms per completed task
+  const kaibloomsToAward = 50;
   
   mockUserProgress = {
     ...mockUserProgress,
@@ -28,7 +28,7 @@ export const awardKaibloomsForTask = (taskEstimatedMinutes: number) => {
     updatedAt: new Date(),
   };
   
-  console.log(`Awarded ${kaibloomsToAward} Kaiblooms for task completion (${taskEstimatedMinutes} minutes estimated)`);
+  console.log(`Awarded ${kaibloomsToAward} Kaiblooms for task completion`);
   console.log(`Total Kaiblooms: ${mockUserProgress.kaibloomsPoints}`);
   
   return kaibloomsToAward;

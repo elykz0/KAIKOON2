@@ -79,12 +79,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   console.log('Auth state:', authState);
 
   const logout = useCallback(async () => {
-    // Optimistically update UI
-    queryClient.setQueryData(AUTH_QUERY_KEY, null);
-    // Make the actual API call
-    await postLogout();
-    // Invalidate the query to ensure proper state
-    queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEY });
+    console.log('Logout function called');
+    try {
+      // Optimistically update UI
+      queryClient.setQueryData(AUTH_QUERY_KEY, null);
+      console.log('Auth data cleared from cache');
+      
+      // Make the actual API call
+      const result = await postLogout();
+      console.log('Logout API result:', result);
+      
+      // Invalidate the query to ensure proper state
+      queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEY });
+      console.log('Auth queries invalidated');
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   }, [queryClient]);
 
   // This should only be used for login. For user profile changes, create separate endpoints and react query hooks

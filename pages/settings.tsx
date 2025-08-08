@@ -111,9 +111,11 @@ const SettingsPage = () => {
     console.log('Logout button clicked');
     setIsLoggingOut(true);
     try {
+      console.log('Calling logout function...');
       await logout();
       console.log('Logout successful');
       toast.success('Logged out successfully.');
+      console.log('Navigating to login page...');
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
@@ -376,7 +378,10 @@ const SettingsPage = () => {
           >
             <Button 
               variant="outline" 
-              onClick={handleLogout}
+              onClick={(e) => {
+                console.log('Button clicked, event:', e);
+                handleLogout();
+              }}
               disabled={isLoggingOut}
             >
               {isLoggingOut ? 'Logging out...' : 'Log Out'}
