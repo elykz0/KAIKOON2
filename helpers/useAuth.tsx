@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSession } from "../endpoints/auth/session_GET.schema";
 import { postLogout } from "../endpoints/auth/logout_POST.schema";
 import { User } from "./User";
+import { persistence } from "./persistence";
 
 // React Query key for auth session. Make sure to optimistically update user infos using this.
 export const AUTH_QUERY_KEY = ["auth", "session"] as const;
@@ -81,6 +82,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = useCallback(async () => {
     console.log('Logout function called');
     try {
+      // Clear user-specific data from localStorage before logout
+      if (authState.type === 'authenticated') {
+        console.log('Clearing user-specific data for user:', authState.user.id);
+        persistence.clearUserData(authState.user.id);
+      }
+      
       // Optimistically update UI
       queryClient.setQueryData(AUTH_QUERY_KEY, null);
       console.log('Auth data cleared from cache');
@@ -96,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('Logout error:', error);
       throw error;
     }
-  }, [queryClient]);
+  }, [queryClient, authState]);
 
   // This should only be used for login. For user profile changes, create separate endpoints and react query hooks
   // and update the data linked to AUTH_QUERY_KEY.
@@ -122,4 +129,13 @@ export const useAuth = (): AuthContextType => {
     throw new Error("useAuth must be used within a AuthProvider");
   }
   return context;
+};
+
+// Helper hook to get current user ID
+export const useCurrentUserId = (): number | undefined => {
+  const { authState } = useAuth();
+  if (authState.type === 'authenticated') {
+    return authState.user.id;
+  }
+  return undefined;
 };

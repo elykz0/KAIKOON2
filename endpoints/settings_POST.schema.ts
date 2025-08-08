@@ -21,9 +21,9 @@ export type InputType = z.infer<typeof schema>;
 
 export type OutputType = Selectable<UserSettings>;
 
-import { mockSettings } from './settings_GET.schema';
+import { getMockSettings } from './settings_GET.schema';
 
-export const postSettings = async (body: InputType, init?: RequestInit): Promise<OutputType> => {
+export const postSettings = async (body: InputType, init?: RequestInit, userId?: number): Promise<OutputType> => {
   const validatedInput = schema.parse(body);
   try {
     const result = await fetch(`/_api/settings`, {
@@ -47,23 +47,29 @@ export const postSettings = async (body: InputType, init?: RequestInit): Promise
     // Update mock settings when API is not available
     console.warn('Settings API not available, using mock data:', error);
     
-    // Update the mock settings with the new values
-    mockSettings.grade = validatedInput.grade || null;
-    mockSettings.classes = validatedInput.classes || null;
-    mockSettings.biggerText = validatedInput.biggerText || false;
-    mockSettings.breakRemindersEnabled = validatedInput.breakRemindersEnabled ?? true;
-    mockSettings.breakReminderInterval = validatedInput.breakReminderInterval || 30;
-    mockSettings.celebrationNotificationsEnabled = validatedInput.celebrationNotificationsEnabled ?? true;
-    mockSettings.dailyCheckinEnabled = validatedInput.dailyCheckinEnabled ?? true;
-    mockSettings.kaibeatPlaylistUrl = validatedInput.kaibeatPlaylistUrl || null;
-    mockSettings.notificationsEnabled = validatedInput.notificationsEnabled ?? true;
-    mockSettings.updatedAt = new Date();
+    // Get current mock settings for the user
+    const currentSettings = getMockSettings(userId);
     
-    // Save to localStorage
-    persistence.saveSettings(mockSettings);
+    // Update the settings with the new values
+    const updatedSettings = {
+      ...currentSettings,
+      grade: validatedInput.grade ?? currentSettings.grade,
+      classes: validatedInput.classes ?? currentSettings.classes,
+      biggerText: validatedInput.biggerText ?? currentSettings.biggerText,
+      breakRemindersEnabled: validatedInput.breakRemindersEnabled ?? currentSettings.breakRemindersEnabled,
+      breakReminderInterval: validatedInput.breakReminderInterval ?? currentSettings.breakReminderInterval,
+      celebrationNotificationsEnabled: validatedInput.celebrationNotificationsEnabled ?? currentSettings.celebrationNotificationsEnabled,
+      dailyCheckinEnabled: validatedInput.dailyCheckinEnabled ?? currentSettings.dailyCheckinEnabled,
+      kaibeatPlaylistUrl: validatedInput.kaibeatPlaylistUrl ?? currentSettings.kaibeatPlaylistUrl,
+      notificationsEnabled: validatedInput.notificationsEnabled ?? currentSettings.notificationsEnabled,
+      updatedAt: new Date(),
+    };
     
-    console.log('Updated mock settings:', mockSettings);
+    // Save to localStorage with user-specific key
+    persistence.saveSettings(updatedSettings, userId);
     
-    return mockSettings;
+    console.log('Updated mock settings for user:', userId, updatedSettings);
+    
+    return updatedSettings;
   }
 };

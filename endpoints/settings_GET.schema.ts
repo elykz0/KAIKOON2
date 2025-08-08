@@ -10,27 +10,32 @@ export type InputType = z.infer<typeof schema>;
 
 export type OutputType = Selectable<UserSettings>;
 
-// Mock storage for settings - load from localStorage on initialization
-export let mockSettings: OutputType = persistence.loadSettings() || {
-  id: 1,
-  userId: 1,
-  hapticBuzz: true,
-  soundEffects: true,
-  notifications: true,
-  theme: 'light',
-  fontSize: 'medium',
-  grade: null,
-  classes: null,
-  biggerText: false,
-  breakRemindersEnabled: true,
-  breakReminderInterval: 30,
-  celebrationNotificationsEnabled: true,
-  dailyCheckinEnabled: true,
-  kaibeatPlaylistUrl: null,
-  notificationsEnabled: true,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-} as OutputType;
+// Function to get mock settings for a specific user
+export const getMockSettings = (userId?: number): OutputType => {
+  return persistence.loadSettings(userId) || {
+    id: 1,
+    userId: userId || 1,
+    hapticBuzz: true,
+    soundEffects: true,
+    notifications: true,
+    theme: 'light',
+    fontSize: 'medium',
+    grade: null,
+    classes: null,
+    biggerText: false,
+    breakRemindersEnabled: true,
+    breakReminderInterval: 30,
+    celebrationNotificationsEnabled: true,
+    dailyCheckinEnabled: true,
+    kaibeatPlaylistUrl: null,
+    notificationsEnabled: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as OutputType;
+};
+
+// Legacy mock settings for backward compatibility
+export let mockSettings: OutputType = getMockSettings();
 
 export const getSettings = async (init?: RequestInit): Promise<OutputType> => {
   try {
