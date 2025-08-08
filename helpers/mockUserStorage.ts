@@ -112,4 +112,43 @@ export const mockUserStorage = {
     const maxId = Math.max(...users.map(u => u.id), 0);
     return maxId + 1;
   },
+
+  // Clear all stored users (for testing/debugging)
+  clearAllUsers: () => {
+    try {
+      localStorage.removeItem('kaikoon-mock-users');
+      console.log('Cleared all stored users');
+    } catch (error) {
+      console.error('Failed to clear stored users:', error);
+    }
+  },
+
+  // Get debug info about current storage
+  getDebugInfo: () => {
+    try {
+      const stored = localStorage.getItem('kaikoon-mock-users');
+      const users = mockUserStorage.getUsers();
+      return {
+        storedRaw: stored,
+        parsedUsers: users,
+        userCount: users.length,
+        userEmails: users.map(u => u.email)
+      };
+    } catch (error) {
+      return { error: error.message };
+    }
+  },
+
+  // Test function that can be called from browser console
+  test: () => {
+    console.log('=== MOCK USER STORAGE TEST ===');
+    console.log('Debug info:', mockUserStorage.getDebugInfo());
+    console.log('All users:', mockUserStorage.getUsers());
+    console.log('=== END TEST ===');
+  },
 };
+
+// Expose for browser console debugging
+if (typeof window !== 'undefined') {
+  (window as any).mockUserStorage = mockUserStorage;
+}
