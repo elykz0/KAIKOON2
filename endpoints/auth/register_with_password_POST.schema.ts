@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { User } from "../../helpers/User";
+import { mockUserStorage } from "../../helpers/mockUserStorage";
 
 export const schema = z.object({
   email: z.string().email("Email is required"),
@@ -39,46 +40,14 @@ export const postRegister = async (
     // Return mock data when API is not available
     console.warn('Register API not available, using mock data:', error);
     
-    // Mock user database - same as login endpoint
-    const mockUsers = [
-      {
-        id: 1,
-        email: "test@example.com",
-        password: "Password123",
-        displayName: "Test User",
-        role: "user" as const,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 2,
-        email: "admin@kaikoon.com",
-        password: "Admin123",
-        displayName: "Admin User",
-        role: "admin" as const,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 3,
-        email: "user@example.com",
-        password: "User123",
-        displayName: "Regular User",
-        role: "user" as const,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    ];
-    
     // Check if email already exists
-    const existingUser = mockUsers.find(u => u.email === validatedInput.email);
-    if (existingUser) {
+    if (mockUserStorage.emailExists(validatedInput.email)) {
       throw new Error("Email already in use");
     }
     
     // Create new user
     const newUser = {
-      id: Date.now(), // Use timestamp as mock ID
+      id: mockUserStorage.getNextUserId(),
       email: validatedInput.email,
       password: validatedInput.password,
       displayName: validatedInput.displayName,
@@ -87,8 +56,8 @@ export const postRegister = async (
       updatedAt: new Date(),
     };
     
-    // Add to mock database (in a real app, this would persist)
-    mockUsers.push(newUser);
+    // Add to persistent mock database
+    mockUserStorage.addUser(newUser);
     
     // Return user without password
     const { password, ...userWithoutPassword } = newUser;

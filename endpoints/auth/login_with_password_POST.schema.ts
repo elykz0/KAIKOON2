@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { User } from "../../helpers/User";
+import { mockUserStorage } from "../../helpers/mockUserStorage";
 
 export const schema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -44,39 +45,8 @@ export const postLogin = async (
     // Return mock data when API is not available
     console.warn('Login API not available, using mock data:', error);
     
-    // Mock user database - only these credentials work
-    const mockUsers = [
-      {
-        id: 1,
-        email: "test@example.com",
-        password: "Password123",
-        displayName: "Test User",
-        role: "user" as const,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 2,
-        email: "admin@kaikoon.com",
-        password: "Admin123",
-        displayName: "Admin User",
-        role: "admin" as const,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 3,
-        email: "user@example.com",
-        password: "User123",
-        displayName: "Regular User",
-        role: "user" as const,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    ];
-    
-    // Find user by email
-    const user = mockUsers.find(u => u.email === validatedInput.email);
+    // Find user by email using persistent storage
+    const user = mockUserStorage.findUserByEmail(validatedInput.email);
     
     console.log('Login attempt:', {
       email: validatedInput.email,
