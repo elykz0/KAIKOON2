@@ -51,15 +51,18 @@ export const postLogin = async (
     console.log('Login attempt:', {
       email: validatedInput.email,
       userFound: !!user,
-      passwordMatch: user ? user.password === validatedInput.password : false
+      passwordMatch: user ? user.password === validatedInput.password : false,
+      userDetails: user ? { id: user.id, email: user.email, displayName: user.displayName } : null
     });
     
     if (!user) {
+      console.log('User not found for email:', validatedInput.email);
       throw new Error("Invalid email or password");
     }
     
     // Check password
     if (user.password !== validatedInput.password) {
+      console.log('Password mismatch for user:', user.email);
       throw new Error("Invalid email or password");
     }
     

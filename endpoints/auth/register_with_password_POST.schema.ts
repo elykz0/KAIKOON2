@@ -56,8 +56,14 @@ export const postRegister = async (
       updatedAt: new Date(),
     };
     
+    console.log('Creating new user:', { email: newUser.email, id: newUser.id, displayName: newUser.displayName });
+    
     // Add to persistent mock database
     mockUserStorage.addUser(newUser);
+    
+    // Verify the user was saved by trying to find it
+    const savedUser = mockUserStorage.findUserByEmail(validatedInput.email);
+    console.log('Verification - saved user found:', savedUser ? 'YES' : 'NO');
     
     // Return user without password
     const { password, ...userWithoutPassword } = newUser;
